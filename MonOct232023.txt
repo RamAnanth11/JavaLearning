@@ -1,0 +1,14 @@
+2023-10-23 00:20:19.429 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-23 00:20:19.467 GatewayLandingPageController /miniStatement_new_web api is completed 
+2023-10-23 00:20:41.249 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-23 00:20:41.265 GatewayLandingPageController /miniStatement_new_web api is completed 
+2023-10-23 00:28:27.095 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-23 00:28:27.117 GatewayLandingPageController /miniStatement_new_web api is completed 
+2023-10-23 00:39:29.903 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-23 00:39:29.920 GatewayLandingPageController /miniStatement_new_web api is completed {"Status":false,"Message":"This is a sample PDF document created using PDFBox.,"Description":"null", "RecordId":null}
+2023-10-23 00:39:57.529 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-23 00:39:57.549 GatewayLandingPageController /miniStatement_new_web api is completed {"Status":false,"Message":"This is a sample PDF document created using PDFBox.,"Description":"null", "RecordId":null}
+2023-10-23 00:41:45.060 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-23 00:41:45.082 GatewayLandingPageController /miniStatement_new_web api is completed {"Status":false,"Message":"Hi This is message,"Description":"This is success message", "RecordId":101}
+2023-10-23 00:54:21.185 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-23 00:54:21.199 GatewayLandingPageController /miniStatement_new_web api is completed {"Status":false,"Message":"Hi This is message,"Description":"This is success message", "RecordId":101}
