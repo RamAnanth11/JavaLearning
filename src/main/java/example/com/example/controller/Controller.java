@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -13,7 +15,10 @@ import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,73 +43,122 @@ public class Controller {
 
 	@GetMapping("/export/pdf")
 	public void exportStringAsPdf(HttpServletResponse response) throws IOException, DocumentException {
-		response.setContentType("application/pdf");
-		response.setHeader("Content-Disposition", "inline; filename=exported-data.pdf");
+	    response.setContentType("application/pdf");
+	    response.setHeader("Content-Disposition", "attachment; filename=exported-data.pdf");
 
-		Document document = new Document();
-		PdfWriter writer = PdfWriter.getInstance(document, response.getOutputStream());
-		document.open();
+	    Document document = new Document();
+	    PdfWriter writer = PdfWriter.getInstance(document, response.getOutputStream());
+	    document.open();
 
-		// Your string data that you want to export as PDF
-		String data = "This is the data you want to export as a PDF.";
+	    // Your string data that you want to export as PDF
+	    String data = "This is the data you want to export as a PDF .";
 
-		// Add the data to the PDF
-		document.add(new Paragraph(data));
+	    // Add the data to the PDF
+	    document.add(new Paragraph(data));
 
-		document.close();
+	    document.close();
 	}
 
-	@GetMapping("/export/passwordpdf")
-	public void exportStringAsPasswordPdf(HttpServletResponse response) throws IOException, DocumentException {
-		response.setContentType("application/pdf");
-		response.setHeader("Content-Disposition", "inline; filename=exported-data.pdf");
-
-		Document document = new Document();
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
-
+//	@GetMapping("/export/passwordpdf")
+//	public void exportStringAsPasswordPdf(HttpServletResponse response) throws IOException, DocumentException {
+//	    response.setContentType("application/pdf");
+//	    response.setHeader("Content-Disposition", "attachment; filename=exported-data.pdf");
+//
+//	    Document document = new Document();
+//	    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//	    PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
+//
 //	    // Set a password for the PDF document
 //	    String userPassword = "yourUserPassword"; // Set your desired user password
 //	    String ownerPassword = "yourOwnerPassword"; // Set your desired owner password
 //	    writer.setEncryption(userPassword.getBytes(), ownerPassword.getBytes(), PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_128);
+//
+//	    document.open();
+//
+//	    // Your string data that you want to export as PDF
+//	    String data = "This is the data you want to export as a PDF.";
+//
+//	    // Add the data to the PDF
+//	    document.add(new Paragraph(data));
+//
+//	    document.close();
+//
+//	    // Now, you can write the password-protected PDF to the response
+//	    response.setContentLength(byteArrayOutputStream.size());
+//	    OutputStream os = response.getOutputStream();
+//	    byteArrayOutputStream.writeTo(os);
+//	    os.flush();
+//	    os.close();
+//	}
 
-		// Set a password for the PDF document
-		String userPassword = "yourUserPassword"; // Set your desired user password
-		String ownerPassword = "yourOwnerPassword"; // Set your desired owner password
-		writer.setEncryption(userPassword.getBytes(), ownerPassword.getBytes(), PdfWriter.ALLOW_PRINTING,
-				PdfWriter.ENCRYPTION_AES_128);
+    @Autowired
+    private JavaMailSender javaMailSender;
 
-		document.open();
+    @GetMapping("/email/pdfpassword")
+    public void exportStringAsPasswordPdfIText(HttpServletResponse response) throws IOException, DocumentException {
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=exported-data.pdf");
 
-		// Your string data that you want to export as PDF
-		String data = "This is the data you want to export as a PDF.";
+        Document document = new Document();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
+        
+	    // Set a password for the PDF document
+	    String userPassword = "yourUserPassword"; // Set your desired user password
+	    String ownerPassword = "yourOwnerPassword"; // Set your desired owner password
+	    writer.setEncryption(userPassword.getBytes(), ownerPassword.getBytes(), PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_128);
 
-		// Add the data to the PDF
-		document.add(new Paragraph(data));
+        document.open();
 
-		document.close();
+        // Your string data that you want to export as PDF
+        String data = "This is the data you want to export as a PDF .";
 
-		// Now, you can write the password-protected PDF to the response
-		response.setContentLength(byteArrayOutputStream.size());
-		OutputStream os = response.getOutputStream();
-		byteArrayOutputStream.writeTo(os);
-		os.flush();
-		os.close();
-	}
+        // Add the data to the PDF
+        document.add(new Paragraph(data));
 
+        document.close();
+
+        // Send the PDF as an email attachment
+        sendEmailWithAttachment(byteArrayOutputStream.toByteArray());
+    }
+
+    // Method to send an email with the PDF attachment using JavaMailSender
+    private void sendEmailWithAttachment(byte[] pdfData) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            // Set the email subject and body
+            helper.setSubject("PDF Attachment");
+            helper.setText("Please find the PDF attachment in this email.");
+
+            // Attach the PDF
+            helper.addAttachment("exported-data.pdf", new ByteArrayResource(pdfData));
+
+            // Set the recipient's email address
+            helper.setTo("kirpalravi51@gmail.com");
+
+            // Send the email
+            javaMailSender.send(message);
+
+            System.out.println("Email sent successfully.");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
 	@GetMapping("/export/pdfbox")
 	public void exportStringAsPdfbox(HttpServletResponse response) throws IOException {
 		response.setContentType("application/pdf"); // Set the content type to PDF
 		response.setHeader("Content-Disposition", "attachment; filename=sample.pdf");
-
-		String message = "This is a sample PDF document created using PDFBox.";
+		
+		String message = "This is a Example PDF";
 
 		PDDocument doc = new PDDocument();
 		try {
 			PDPage page = new PDPage();
 			doc.addPage(page);
 
-			PDType1Font font = PDType1Font.HELVETICA_BOLD;
+			PDType1Font font = PDType1Font.COURIER;
 
 			PDPageContentStream contents = new PDPageContentStream(doc, page);
 			contents.setFont(font, 12); // Adjust the font size
@@ -127,5 +181,4 @@ public class Controller {
 		RecordLogs.writeLogFile("GatewayLandingPageController /miniStatement_new_web api is completed "+response2);
 		return ResponseEntity.ok(response2);
 	}
-
 }

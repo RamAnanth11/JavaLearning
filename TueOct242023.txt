@@ -1,0 +1,2 @@
+2023-10-24 16:57:57.454 GatewayLandingPageController /miniStatement_new_web api is calling 
+2023-10-24 16:57:57.579 GatewayLandingPageController /miniStatement_new_web api is completed {"Status":false,"Message":"Hi This is message,"Description":"This is success message", "RecordId":}
